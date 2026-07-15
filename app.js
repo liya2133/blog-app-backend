@@ -17,6 +17,58 @@ Mongoose.connect(
     console.log("MongoDB Connected");
 });
 
+// Signin API
+app.post("/signin", async (req, res) => {
+
+    let input = req.body;
+
+    userModel.find({ email: input.email }).then(
+        (items) => {
+
+            if (items.length > 0) {
+
+                const passwordValidator = Bcrypt.compareSync(
+                    input.password,
+                    items[0].password
+                );
+
+                if (passwordValidator) {
+
+                    Jwt.sign(
+                        { email: input.email },
+                        "blogApp",
+                        { expiresIn: "1d" },
+                        (error, token) => {
+
+                            if (error) {
+                                res.json({
+                                    status: "error",
+                                    errorMessage: error
+                                });
+                            } else {
+                                res.json({
+                                    status: "success",
+                                    token: token,
+                                    userId: items[0]._id
+                                });
+                            }
+
+                        }
+                    );
+
+                } else {
+                    res.json({ status: "incorrect password" });
+                }
+
+            } else {
+                res.json({ status: "Invalid Email ID" });
+            }
+
+        }
+    );
+
+});
+
 // Signup API
 app.post("/signup", async (req, res) => {
 
