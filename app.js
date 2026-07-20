@@ -16,25 +16,51 @@ Mongoose.connect(
 ).then(() => {
     console.log("MongoDB Connected");
 });
+
 // create a post
-app.post("/create",async(req,res)=>{
-    let input=req.body
-    let token=req.headers.token
-    Jwt.verify(token,"blogApp",async(error,decoded)=>{
-        if(decoded && decoded.email){
-            let result=new postModel(input)
-            await result.save()
+app.post("/create", async (req, res) => {
+    let input = req.body;
+    let token = req.headers.token;
+
+    Jwt.verify(token, "blogApp", async (error, decoded) => {
+        if (decoded && decoded.email) {
+            let result = new postModel(input);
+            await result.save();
+            res.json({ "status": "success" });   // Added response
         }
-        else{
-            res.json({"status":"invalid authentication"})
+        else {
+            res.json({ "status": "invalid authentication" });
         }
-    })
+    });
+});
 
+// view all posts
+app.post("/viewall", (req, res) => {
 
+    let token = req.headers.token;   // Corrected
 
+    Jwt.verify(token, "blogApp", (error, decoded) => {
 
+        if (decoded && decoded.email) {
 
-})
+            postModel.find().then(
+                (items) => {
+                    res.json(items);
+                }
+            ).catch(
+                (error) => {
+                    res.json({ "status": "error" });
+                }
+            );
+
+        } else {
+            res.json({ "status": "Invalid Authentication" });
+        }
+
+    });
+
+});
+
 // Signin API
 app.post("/signin", async (req, res) => {
 
