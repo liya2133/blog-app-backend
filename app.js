@@ -4,7 +4,7 @@ const Cors = require("cors");
 const Bcrypt = require("bcrypt");
 const Jwt = require("jsonwebtoken");
 const userModel = require("./model/users");
-
+const postModel = require("./model/post");
 const app = Express();
 
 app.use(Express.json());
@@ -16,7 +16,25 @@ Mongoose.connect(
 ).then(() => {
     console.log("MongoDB Connected");
 });
+// create a post
+app.post("/create",async(req,res)=>{
+    let input=req.body
+    let token=req.headers.token
+    Jwt.verify(token,"blogApp",async(error,decoded)=>{
+        if(decoded && decoded.email){
+            let result=new postModel(input)
+            await result.save()
+        }
+        else{
+            res.json({"status":"invalid authentication"})
+        }
+    })
 
+
+
+
+
+})
 // Signin API
 app.post("/signin", async (req, res) => {
 
